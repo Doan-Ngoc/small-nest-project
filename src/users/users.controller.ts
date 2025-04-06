@@ -14,18 +14,23 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { authCredentialDto } from './dto/authCredentials-dto';
-import { User } from './user.model';
 import { UserOwnershipGuard } from 'src/guards/UserOwnership.guard';
 import { GetUser } from 'src/decorators/get-user.decorator';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { User } from './entities/user.entity';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  getAllUsers() {
+  getAllUsers(): Promise<User[]> {
     return this.usersService.getAllUsers();
+  }
+
+  @Get(':id')
+  getUserById(@Param('id') id: string): Promise<User> {
+    return this.usersService.getUserById(id);
   }
 
   @Post()
@@ -33,27 +38,41 @@ export class UsersController {
     return this.usersService.createUser(createUserDto);
   }
 
-  @Get(':id')
-  getById(@Param('id') id: string) {
-    return this.usersService.getUserById(id);
-  }
-
   @UseGuards(AuthGuard)
-  @Delete()
-  deleteUser(@GetUser() user) {
+  @Delete('')
+  deleteUser(@GetUser() user: User) {
     const id = user.id;
     return this.usersService.deleteUser(id);
   }
 
   @UseGuards(AuthGuard)
   @Put()
-  update(@GetUser() user, @Body() updateUserDto: UpdateUserDto) {
+  update(@GetUser() user: User, @Body() updateUserDto: UpdateUserDto) {
     const id = user.id;
     return this.usersService.updateUser(id, updateUserDto);
   }
 
-  // @Post('login')
-  // logIn(@Body() authCredentialDto: authCredentialDto) {
-  //   return this.usersService.logIn(authCredentialDto);
+  // @Get()
+  // getAllUsers() {
+  //   return this.usersService.getAllUsers();
+  // }
+
+  // @Post()
+  // create(@Body() createUserDto: CreateUserDto) {
+  //   return this.usersService.createUser(createUserDto);
+  // }
+
+  // @UseGuards(AuthGuard)
+  // @Delete()
+  // deleteUser(@GetUser() user) {
+  //   const id = user.id;
+  //   return this.usersService.deleteUser(id);
+  // }
+
+  // @UseGuards(AuthGuard)
+  // @Put()
+  // update(@GetUser() user, @Body() updateUserDto: UpdateUserDto) {
+  //   const id = user.id;
+  //   return this.usersService.updateUser(id, updateUserDto);
   // }
 }

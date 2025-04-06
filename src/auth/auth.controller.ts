@@ -20,6 +20,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private configService: ConfigService,
   ) {}
+
   @Post('login')
   logIn(@Body() authCredentialDto: authCredentialDto) {
     return this.authService.logIn(authCredentialDto);

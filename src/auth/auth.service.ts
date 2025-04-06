@@ -14,6 +14,8 @@ import * as jwt from 'jsonwebtoken';
 import { JwtService } from '../jwt/jwt.service';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
+import { UserRepository } from 'src/users/users.repository';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +24,8 @@ export class AuthService {
     private readonly usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    @InjectRepository(UserRepository)
+    private userRepository: UserRepository,
   ) {}
 
   hashPassword(password: string) {
@@ -35,12 +39,9 @@ export class AuthService {
 
   async logIn(authCredentialDto: authCredentialDto) {
     const { username, password } = authCredentialDto;
-    const user = this.usersService.getUserByUserName(username);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    const user = await this.usersService.getUserByUserName(username);
     const checkPassword = await this.comparePassword(password, user.password);
-    if (!checkPassword) throw new BadRequestException('Password not correct');
+    if (!checkPassword) throw new BadRequestException('Password incorrect');
 
     return {
       accessToken: this.jwtService.sign(
